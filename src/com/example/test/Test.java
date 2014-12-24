@@ -1,11 +1,18 @@
 package com.example.test;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.ActionBar;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,13 +31,16 @@ public class Test extends Activity implements View.OnClickListener{
 	public static final int SHOWINFO = 101;
 	
 	private Button btnGetBoxinfo;
+	private Button btnRelase;
 	private MyHandler mHandler;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_test);
-		btnGetBoxinfo = (Button) findViewById(R.id.get_box_info);
+		btnGetBoxinfo = (Button) findViewById(R.id.btn_box_info);
 		btnGetBoxinfo.setOnClickListener(this);
+		btnRelase = (Button) findViewById(R.id.btn_relase);
+		btnRelase.setOnClickListener(this);
 		mHandler = new MyHandler();
 	}
 
@@ -57,9 +67,12 @@ public class Test extends Activity implements View.OnClickListener{
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()) {
-		case R.id.get_box_info:
+		case R.id.btn_box_info:
 			mHandler.removeMessages(SHOWINFO);
 			mHandler.sendEmptyMessage(SHOWINFO);
+			break;
+		case R.id.btn_relase:
+			new ReleaseTask(Test.this).execute();
 			break;
 		}
 	}
@@ -97,6 +110,6 @@ public class Test extends Activity implements View.OnClickListener{
 			}
 		}
 		
-	}
-
+	}	
+	
 }
