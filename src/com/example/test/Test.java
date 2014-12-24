@@ -23,9 +23,6 @@ public class Test extends Activity implements View.OnClickListener{
 	public static final String TAG = "TestApk";
 	public static final int SHOWINFO = 101;
 	
-	public static final String STORAGEBYTES = "storagesize";
-	public static final String MEMSIZEKB = "memsize";
-	
 	private Button btnGetBoxinfo;
 	private MyHandler mHandler;
 	@Override
@@ -61,20 +58,8 @@ public class Test extends Activity implements View.OnClickListener{
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.get_box_info:
-			Boxinfo boxinfo = new Boxinfo();
-			boxinfo.logAndroidBuild();
-			long storageBytes = boxinfo.getStorageBytes();
-			int memSize = boxinfo.getMemSizeKB();
-			boxinfo.logWifiInfo(getApplicationContext());
-			boxinfo.logNetworkInfo();
-			Message msg = mHandler.obtainMessage();
-			msg.what = SHOWINFO;
-			Bundle bundle = new Bundle();
-			bundle.putInt(MEMSIZEKB, memSize);
-			bundle.putLong(STORAGEBYTES, storageBytes);
-			msg.setData(bundle);
 			mHandler.removeMessages(SHOWINFO);
-			mHandler.sendMessage(msg);
+			mHandler.sendEmptyMessage(SHOWINFO);
 			break;
 		}
 	}
@@ -84,9 +69,19 @@ public class Test extends Activity implements View.OnClickListener{
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
 			case SHOWINFO:
-				long storageBytes = msg.getData().getLong(STORAGEBYTES);
-				int memSize = msg.getData().getInt(MEMSIZEKB);
+				Boxinfo boxinfo = new Boxinfo();
+				boxinfo.logAndroidBuild();
+				boxinfo.logWifiInfo(getApplicationContext());
+				boxinfo.logNetworkInfo();
+				long storageBytes = boxinfo.getStorageBytes();
+				int memSize = boxinfo.getMemSizeKB();
 				StringBuilder info = new StringBuilder();
+				info.append("型号：" + Build.MODEL + "\n");
+				info.append("cpu: " + Build.CPU_ABI + " " + boxinfo.getcpuNum() + "核\n");
+				info.append("有线mac: " + boxinfo.getMACAddress("eth0") + "\n");
+				info.append("无线mac: " + boxinfo.getMACAddress("wlan0") + "\n");
+				info.append("蓝牙mac: " + boxinfo.getBluetoothMac() + "\n");
+				info.append("系统版本：" + Build.VERSION.RELEASE + "\n");
 				info.append("内存：" + String.format("%.2f", memSize/1024/1024.0) + "G\n");
 				info.append("存储：" + String.format("%.2f", storageBytes/1024/1024/1024.0) + "G\n");
 				new AlertDialog.Builder(Test.this)

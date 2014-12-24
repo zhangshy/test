@@ -2,6 +2,7 @@ package com.example.test;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,9 +14,11 @@ import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -180,4 +183,64 @@ public class Boxinfo {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 返回MAC地址，
+	 * @param interfaceName 如eth0 wlan0
+	 * @return mac地址，若没有对应设备返回null
+	 */
+	public String getMACAddress(String interfaceName) {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                if (interfaceName != null) {
+                    if (!intf.getName().equalsIgnoreCase(interfaceName)) continue;
+                }
+                byte[] mac = intf.getHardwareAddress();
+                if (mac==null) return "";
+                StringBuilder buf = new StringBuilder();
+                for (int idx=0; idx<mac.length; idx++)
+                    buf.append(String.format("%02X:", mac[idx]));       
+                if (buf.length()>0) buf.deleteCharAt(buf.length()-1);
+                return buf.toString();
+            }
+        } catch (Exception ex) { } // for now eat exceptions
+        return null;
+	}
+	
+	/**
+	 * 使用BluetoothAdapter获取蓝牙mac
+	 * @return
+	 */
+	public String getBluetoothMac() {
+		String mac = null;
+		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+		mac = adapter.getAddress();
+		Log.d(Test.TAG, adapter.getName() + " mac:" + mac + ";state:" + adapter.getState());
+		return mac;
+	}
+	
+	class CpuFileFilter implements FileFilter {
+		public boolean accept(File file) {
+			//正则表达式比较
+			if (Pattern.matches("cpu[0-9]", file.getName())) {
+				return true;
+			}
+			return false;
+		}
+	}
+	/**
+	 * 通过查找/sys/devices/system/cpu/下的cpu文件个数确定CPU核心数
+	 * 而/sys/devices/system/cpu/kernel_max: the maximum cpu index allowed by the kernel configuration
+	 * @return cpu核心数
+	 */
+	public int getcpuNum() {
+		int num = 0;
+		File dir = new File("/sys/devices/system/cpu/");
+		File[] files = dir.listFiles(new CpuFileFilter());
+		num = files.length;
+		Log.d(Test.TAG, "cpu nums: " + num);
+		return num;
+	}
+	
 }
