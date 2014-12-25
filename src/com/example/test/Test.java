@@ -32,6 +32,7 @@ public class Test extends Activity implements View.OnClickListener{
 	
 	private Button btnGetBoxinfo;
 	private Button btnRelase;
+	private Button btnCapture;
 	private MyHandler mHandler;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,8 @@ public class Test extends Activity implements View.OnClickListener{
 		btnGetBoxinfo.setOnClickListener(this);
 		btnRelase = (Button) findViewById(R.id.btn_relase);
 		btnRelase.setOnClickListener(this);
+		btnCapture = (Button) findViewById(R.id.btn_capture);
+		btnCapture.setOnClickListener(this);
 		mHandler = new MyHandler();
 	}
 
@@ -73,6 +76,9 @@ public class Test extends Activity implements View.OnClickListener{
 			break;
 		case R.id.btn_relase:
 			new ReleaseTask(Test.this).execute();
+			break;
+		case R.id.btn_capture:
+			new ScreenCapture(Test.this).save2Pic();;
 			break;
 		}
 	}
