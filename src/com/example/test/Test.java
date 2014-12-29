@@ -22,13 +22,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 import android.os.Build;
 
 public class Test extends Activity implements View.OnClickListener{
 
 	public static final String TAG = "TestApk";
 	public static final int SHOWINFO = 101;
+	public static final int SCREENCAPTURE = 102;
 	
 	private Button btnGetBoxinfo;
 	private Button btnRelase;
@@ -78,7 +81,8 @@ public class Test extends Activity implements View.OnClickListener{
 			new ReleaseTask(Test.this).execute();
 			break;
 		case R.id.btn_capture:
-			new ScreenCapture(Test.this).save2Pic();;
+			mHandler.removeMessages(SCREENCAPTURE);
+			mHandler.sendEmptyMessage(SCREENCAPTURE);
 			break;
 		}
 	}
@@ -103,15 +107,31 @@ public class Test extends Activity implements View.OnClickListener{
 				info.append("系统版本：" + Build.VERSION.RELEASE + "\n");
 				info.append("内存：" + String.format("%.2f", memSize/1024/1024.0) + "G\n");
 				info.append("存储：" + String.format("%.2f", storageBytes/1024/1024/1024.0) + "G\n");
-				new AlertDialog.Builder(Test.this)
+				AlertDialog.Builder builder = new AlertDialog.Builder(Test.this)
 					.setTitle("设备信息")
 					.setMessage(info.toString())
 					.setPositiveButton("确定", new OnClickListener() {
 						public void onClick(DialogInterface dialog, int arg1) {
 							dialog.dismiss();
 						}
-					})
-					.show();
+					});
+				AlertDialog alertDialog = builder.create();
+				//可用于server显示dialog，需要SYSTEM_ALERT_WINDOW和SYSTEM_OVERLAY_WINDOW权限
+				//alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);	
+				alertDialog.show();
+//				new AlertDialog.Builder(Test.this)
+//					.setTitle("设备信息")
+//					.setMessage(info.toString())
+//					.setPositiveButton("确定", new OnClickListener() {
+//						public void onClick(DialogInterface dialog, int arg1) {
+//							dialog.dismiss();
+//						}
+//					})
+//					.show();
+				break;
+			case SCREENCAPTURE:
+				new ScreenCapture().saveActivity2png(Test.this);
+				Toast.makeText(Test.this, "截屏成功", Toast.LENGTH_SHORT).show();
 				break;
 			}
 		}
